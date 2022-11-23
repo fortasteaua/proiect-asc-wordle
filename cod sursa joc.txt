@@ -1,0 +1,206 @@
+#include <bits/stdc++.h>
+
+#define fr first
+#define sc second
+#define ll long long
+#define pb push_back
+using namespace std;
+
+ifstream fin("a.in");
+
+ll md = 1e9 + 7;
+int INF = 1e9 + 1;
+ll LINF = 1e18 + 1;
+
+int main() {
+    fstream sem,com;
+    rep1:
+    cout << "Joci tu(0), robotul(1) sau faci statistica(2) ? :\n";
+    int stare;
+    cin >> stare;
+    if (!(stare>=0&&stare<=2)) goto rep1;
+    vector<string> v;
+    string s;
+    while (fin >> s) {
+        v.pb(s);
+    }
+    srand(time(NULL));
+    int icuv = rand() % v.size(), t = 6; // alegere "la intamplare" (nu prea) a unui cuvant
+    int lit[100] = {};
+    for (int i = 0; i < 5; i++) lit[v[icuv][i]] = 1;
+    string I1 = "_____", I2 = "", I3 = ""; // I1 - litere+pozitie I2 - litere I3 - litere gresite
+    while (t > 0) {
+        if(stare==0) {
+            // cerem string + pregatim loop in caz de string invalid
+            rep:
+            cout << "Introdu un cuvant:\n";
+            string si;
+            cin >> si;
+            int sil = si.size();
+            //transformare litere mici in litere mari si verificare daca string-ul contine doar 5 litere si 0 alte caractere
+            for (int i = 0; i < sil; i++) {
+                if (si[i] >= 'a' && si[i] <= 'z') si[i] -= ('a' - 'A');
+                if (si[i] < 'A' || si[i] > 'Z' || sil != 5) {
+                    cout << "Cuvant invalid\n";
+                    goto rep;
+                }
+            }
+            //verificare daca cuvantul se afla in baza de date
+            int ver = 0;
+            for (int i = 0; i < v.size(); i++) {
+                if (v[i] == si) ver = 1, i = v.size() + 1;
+            }
+            //daca nu se afla cerem alt string pe aceeasi incercare
+            if (!ver) {
+                cout << "Cuvant invalid\n";
+                goto rep;
+            }
+            //daca s-a transmis cuvantul terminam jocul
+            if (si == v[icuv]) {
+                cout << "bravo\n";
+                break;
+            } else {
+                for (int i = 0; i < 5; i++) {
+                    if (si[i] == v[icuv][i]) I1[i] = si[i]; //daca litera e pe aceeasi pozitie
+                    else {
+                        if (lit[si[i]] == 1) //daca litera e comuna, dar nu pe aceeasi pozitie
+                        {
+                            I2 = I2 + si[i] + " ";
+                            lit[si[i]] = 2;
+                        } else {
+                            if (lit[si[i]] == 0) //daca litera nu e buna
+                            {
+                                I3 = I3 + si[i] + " ";
+                                lit[si[i]] = 2;
+                            }
+                        }
+                    }
+                }
+            }
+            cout << "Litere pe pozitia corecta gasite: " << I1 << '\n';
+            cout << "Litere din cuvant gasite: " << I2 << '\n';
+            cout << "Litere care nu se afla in cuvant gasite: " << I3 << '\n';
+        }
+        if(stare==1)
+        {
+            sem.open("sem.txt",ios_base::out);
+            sem << 0;
+            sem.close();
+            int asteapta=0;
+            while(asteapta!=1) {
+                sem.open("sem.txt", ios_base::in);
+                sem >> asteapta;
+                sem.close();
+            }
+            string si,ind="00000";
+            com.open("com.txt",ios_base::in);
+            com >> si;
+            com.close();
+            cout << si << '\n';
+            if (si == v[icuv]) {
+                sem.open("sem.txt",ios_base::out);
+                sem << 2;
+                sem.close();
+                cout << "bravo\n";
+                break;
+            } else {
+                for (int i = 0; i < 5; i++) {
+                    if (si[i] == v[icuv][i]) ind[i]='2'; //daca litera e pe aceeasi pozitie
+                    else {
+                        if (lit[si[i]] == 1) //daca litera e comuna, dar nu pe aceeasi pozitie
+                        {
+                            ind[i]='1';
+                        }
+                        }
+                    }
+                }
+            com.open("com.txt",ios_base::out);
+            com << ind;
+            com.close();
+            cout << ind << '\n';
+        }
+        if(stare==2)
+        {
+            double medie=0.00;
+            fstream statis;
+            statis.open("statistica.txt",ios_base::out);
+            int AFSEM=0;
+            for(int kcuv=0;kcuv<v.size();kcuv++)
+            {
+                if(AFSEM==3)
+                {
+                    int asteapta = 0;
+                    while (asteapta != 1) {
+                        sem.open("sem.txt", ios_base::in);
+                        sem >> asteapta;
+                        sem.close();
+                    }
+                }
+                AFSEM=0;
+                string cuvk=v[kcuv];
+                int lit[100] = {};
+                for (int i = 0; i < 5; i++) lit[cuvk[i]] = 1;
+                int nextk=0;
+                string outpt=cuvk;
+                while(!nextk) {
+                    sem.open("sem.txt", ios_base::out);
+                    sem << AFSEM;
+                    sem.close();
+                    int asteapta = 0;
+                    while (asteapta != 1) {
+                        sem.open("sem.txt", ios_base::in);
+                        sem >> asteapta;
+                        sem.close();
+                    }
+                    string si, ind = "00000";
+                    com.open("com.txt", ios_base::in);
+                    com >> si;
+                    medie+=1.0;
+                    outpt+=", ";
+                    outpt+=si;
+                    com.close();
+                    //cout << si << ' ';
+                    if (si == cuvk) {
+                        AFSEM=3;
+                        cout << kcuv << ' ' << cuvk << ' ' << medie/double(kcuv+1)<< '\n';
+                        statis << outpt << '\n';
+                        nextk=1;
+                        sem.open("sem.txt", ios_base::out);
+                        sem << AFSEM;
+                        sem.close();
+                    } else {
+                        AFSEM=0;
+                        for (int i = 0; i < 5; i++) {
+                            if (si[i] == cuvk[i]) ind[i] = '2'; //daca litera e pe aceeasi pozitie
+                            else {
+                                if (lit[si[i]] == 1) //daca litera e comuna, dar nu pe aceeasi pozitie
+                                {
+                                    ind[i] = '1';
+                                }
+                            }
+                        }
+                        com.open("com.txt", ios_base::out);
+                        com << ind;
+                        com.close();
+                    }
+                }
+            }
+            sem.open("sem.txt",ios_base::out);
+            sem << 2;
+            sem.close();
+            medie/=v.size();
+            statis << '\n' << medie;
+            cout << medie << '\n';
+            statis.close();
+            t=-1;
+        }
+    }
+    cout << "Apasa enter";
+    cin.get();
+    cin.get();
+    sem.open("sem.txt",ios_base::out);
+    sem << 3;
+    sem.close();
+    com.open("com.txt",ios_base::out);
+    com.close();
+}

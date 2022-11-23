@@ -1,0 +1,178 @@
+#include <bits/stdc++.h>
+#define pb push_back
+
+using namespace std;
+
+int p=0;
+void calcstat(int poz,int *V)
+{
+    if(poz==5) p--;
+    else {
+        for (int i = 0; i < 3 && p > 0; i++) {
+            V[poz] = i;
+            calcstat(poz + 1, V);
+        }
+    }
+}
+
+int main() {
+    fstream f,sem,com;
+    int inc=0;
+    f.open("a.in",ios_base::in);
+    string s;
+    vector<string> v;
+    map<string,int> m;
+    int cnt=0;
+    unordered_set<string> vt,vset;
+    while(f>>s)
+    {
+        v.pb(s);
+        vt.insert(s);
+        vset.insert(s);
+        m[s]=cnt++;
+    }
+    int stat[244][5]={};
+    for (int cp = 1; cp <= 243; cp++) {
+        p = cp;
+        calcstat(0, stat[cp]);
+    }
+    int gata=0, sterse[11700]={};
+    string cuvant;
+    double medie=0,nmr=0;
+    while(gata==0) {
+        //cin.get();
+        if (inc == 0) {
+            int asteapta = 1;
+            while (asteapta != 0 && asteapta != 2) {
+                sem.open("sem.txt", ios_base::in);
+                sem >> asteapta;
+                sem.close();
+            }
+            if(asteapta == 2)
+            {
+                gata=1;
+                break;
+            }
+            string tarei = "TAREI";
+            sterse[m[tarei]] = 1;
+            com.open("com.txt", ios_base::out);
+            com << "TAREI";
+            cuvant = "TAREI";
+            vt.erase(cuvant);
+            com.close();
+            sem.open("sem.txt", ios_base::out);
+            sem << 1;
+            sem.close();
+            inc++;
+        }
+        else {
+            //cin.get();
+            int asteapta = 1;
+            while (asteapta == 1) {
+                sem.open("sem.txt", ios_base::in);
+                sem >> asteapta;
+                sem.close();
+            }
+            if (asteapta > 1)
+            {
+                if(asteapta == 2)
+                {
+                    nmr++;
+                    medie+=double(inc);
+                    //cout << medie/nmr << '\n';
+                    gata = 1;
+                }
+                else
+                {
+                    nmr++;
+                    medie+=double(inc);
+                    //cout << medie/nmr << '\n';
+                    vt=vset;
+                    for(int i=0;i<v.size();i++) sterse[i]=0;
+                    inc = 0;
+                    sem.open("sem.txt", ios_base::out);
+                    sem << 1;
+                    sem.close();
+                }
+            }
+            else {
+                string ind;
+                com.open("com.txt", ios_base::in);
+                com >> ind;
+                com.close();
+                for(auto it=vt.begin();it!=vt.end();)
+                {
+                    int ver=1,lit[30]={};
+                    string s1=*it;
+                    for(int i=0;i<5&&ver;i++)
+                    {
+                        lit[s1[i]-'A']=1;
+                        if(ind[i]=='2'&&s1[i]!=cuvant[i]) ver=0;
+                    }
+                    for(int i=0;i<5&&ver;i++)
+                    {
+                        if(ind[i]=='0'&&lit[cuvant[i]-'A']==1)
+                        {
+                            //ver0=0;
+                            ver=0;
+                        }
+                        if(ind[i]=='1'&&(lit[cuvant[i]-'A']==0||cuvant[i]==s1[i])) ver=0;
+                    }
+                    it++;
+                    if(!ver) vt.erase(s1);
+                }
+                set<pair<double,pair<int,string>>> r;
+                if(vt.size()>1) {
+                    for (int k = 0; k < v.size(); k++)
+                        if (!sterse[k]) {
+                            string s1 = v[k];
+                            double ent = 0.00;
+                            double permind[3][3][3][3][3]={};
+                            for(auto &s2:vt)
+                            {
+                                int pp[5]={},lits2[30]={};
+                                for(int i=0;i<5;i++) lits2[s2[i]-'A']=1;
+                                for(int i=0;i<5;i++)
+                                {
+                                    if(s1[i]==s2[i]) pp[i]=2;
+                                    else
+                                    {
+                                        if(lits2[s1[i]-'A']==1) pp[i]=1;
+                                    }
+                                }
+                                permind[pp[0]][pp[1]][pp[2]][pp[3]][pp[4]]++;
+                            }
+                            for(int pi=1;pi<=243;pi++)
+                            {
+                                double px=0.00;
+                                px=double(permind[stat[pi][0]][stat[pi][1]][stat[pi][2]][stat[pi][3]][stat[pi][4]])/double(vt.size());
+                                if(px>0)ent+=(-1)*px*log2(px);
+                            }
+                            int inset=0;
+                            if(vt.find(s1)!=vt.end()) inset=1;
+                            if(ent>0.00)
+                            {
+                                r.insert({ent, {inset,s1}});
+                            }
+                            else sterse[k]=1;
+                        }
+                }
+                else r.insert({1.0,{1,*vt.begin()}});
+                auto it=r.end();
+                it--;
+                cuvant=(*it).second.second; // rasp
+                sterse[m[cuvant]]=1;
+                com.open("com.txt", ios_base::out);
+                com << cuvant;
+                com.close();
+                sem.open("sem.txt", ios_base::out);
+                sem << 1;
+                sem.close();
+                inc++;
+            }
+        }
+    }
+    cout << "Apasa enter";
+    cin.get();
+    return 0;
+}
