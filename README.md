@@ -28,4 +28,5 @@ Al treilea pas este sortarea cuvintelor dupa entropie, avand prioritate cuvintel
 ## Referinte 
 
 https://en.wikipedia.org/wiki/Entropy_(information_theory)
+
 https://www.youtube.com/watch?v=v68zYyaEmEA
